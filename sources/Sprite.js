@@ -1,11 +1,10 @@
 /**
  * @class
  * @classdesc Sprite linked to texture.
- * @extends SFHL.Drawable
+ * @implements SFHL.Drawable
  * @todo add texture rect
  */
 SFHL.Sprite = function () {
-	SFHL.Drawable.call(this);
 	this.position = new SFHL.Vector();
 };
 

@@ -1,11 +1,11 @@
 /**
- * Create node from a parent.
+ * Create node for a renderable data.
  * 
- * @param {Object} parent
+ * @param {SFHL.Renderable} data
  */
-SFHL.SceneNode = function (data, parent) {
+SFHL.SceneNode = function (data) {
 	this.data = data;
-	this.parent = parent;
+	this.parent = null;
 	this.children = [];
 	
 	this.position = new SFHL.Vector();
@@ -62,7 +62,6 @@ SFHL.SceneNode.prototype.draw = function (context) {
 		context.translate(this.position.x, this.position.y);
 		context.scale(this.scale.x, this.scale.y);
 		context.rotate(this.rotation);
-		
 		
 		if (this.data) {
 			this.data.render(context);

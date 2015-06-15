@@ -109,79 +109,31 @@ SFHL.MouseButton = {
 	MAX: 	3
 };
 /**
- * Create a vector from two number, or null vector by default.
+ * Enum for line drawing style.
  * 
- * @class
- * @classdesc Two-dimentional vector.
- * @param {number} x [x = 0]
- * @param {number} y [y = 0]
+ * @readonly
+ * @enum {string}
  */
-SFHL.Vector = function (x, y) {
-	this.x = x ? x : 0;
-	this.y = y ? y : 0;
-};
-
-/**
- * @type {number}
- * @default
- */
-SFHL.Vector.prototype.x = 0;
-
-/**
- * @type {number}
- * @default
- */
-SFHL.Vector.prototype.y = 0;
-
-/**
- * Add vector's data to this one.
- * 
- * @param {SFHL.Vector} vector
- */
-SFHL.Vector.prototype.add = function (vector) {
-	this.x += vector.x;
-	this.y += vector.y;
-};
-
-/**
- * Sub vector's data to this one.
- * 
- * @param {SFHL.Vector} vector
- */
-SFHL.Vector.prototype.sub = function (vector) {
-	this.x -= vector.x;
-	this.y -= vector.y;
+SFHL.LineCap = {
+	BUTT: "butt",
+	ROUND: "round",
+	SQUARE: "square"
 };
 /**
- * @class
- * @classdesc Time lord.
+ * Represent a drawable object.
+ * 
+ * @interface
  */
-SFHL.Clock = function () {
-	this.reset();
-};
+SFHL.Drawable = function () {};
 
 /**
- * Return elapsed time (in miliseconds) from last reset.
+ * Render object to context.
  * 
- * @return {number} Elapsed time since last reset.
+ * @abstract
+ * @param {HTMLContext} context
  */
-SFHL.Clock.prototype.getElapsedTime = function () {
-	return (new Date().getTime() - this.lastTime);
-};
-
-/**
- * Reset clock counter.
- * Called on creation.
- * 
- * @return {number} Elapsed time since last reset.
- */
-SFHL.Clock.prototype.reset = function () {
-	var newTime = new Date().getTime();
-	var elapsedTime = newTime - this.lastTime;
-	
-	this.lastTime = newTime;
-	
-	return (elapsedTime);
+SFHL.Drawable.prototype.render = function (context) {
+	throw new Error("Missing draw implementation of Drawable object.");
 };
 /**
  * @class
@@ -353,27 +305,141 @@ SFHL.Color.cyan = new SFHL.Color(0, 0xFF, 0xFF);
  */
 SFHL.Color.white = new SFHL.Color(0xFF, 0xFF, 0xFF);
 /**
+ * Create a vector from two number, or null vector by default.
+ * 
  * @class
- * @classdesc Represent a drawable object.
+ * @classdesc Two-dimentional vector.
+ * @param {number} x [x = 0]
+ * @param {number} y [y = 0]
  */
-SFHL.Drawable = function () {
+SFHL.Vector = function (x, y) {
+	this.x = x ? x : 0;
+	this.y = y ? y : 0;
 };
 
 /**
- * Render object to context.
+ * @type {number}
+ * @default
+ */
+SFHL.Vector.prototype.x = 0;
+
+/**
+ * @type {number}
+ * @default
+ */
+SFHL.Vector.prototype.y = 0;
+
+/**
+ * Add vector's data to this one.
  * 
- * @abstract
+ * @param {SFHL.Vector} vector
+ */
+SFHL.Vector.prototype.add = function (vector) {
+	this.x += vector.x;
+	this.y += vector.y;
+};
+
+/**
+ * Sub vector's data to this one.
+ * 
+ * @param {SFHL.Vector} vector
+ */
+SFHL.Vector.prototype.sub = function (vector) {
+	this.x -= vector.x;
+	this.y -= vector.y;
+};
+/**
+ * @class
+ * @classdesc Pixel arc.
+ * @implements SFHL.Drawable
+ */
+SFHL.Arc = function () {
+	this.position = new SFHL.Vector();
+	this.color = SFHL.Color.black.clone();
+};
+
+SFHL.Arc.prototype = Object.create(SFHL.Drawable.prototype);
+
+/**
+ * @type {SFHL.Vector}
+ */
+SFHL.Arc.prototype.position = null;
+
+/**
+ * @type {SFHL.Color}
+ * @default
+ */
+SFHL.Arc.prototype.color = SFHL.Color.black;
+
+/**
+ * @type {number}
+ * @default
+ */
+SFHL.Arc.prototype.lineWidth = 1;
+
+/**
+ * @type {number}
+ * @default
+ */
+SFHL.Arc.prototype.radius = 0;
+
+/**
+ * @type {number}
+ * @default
+ */
+SFHL.Arc.prototype.startAngle = 0;
+
+/**
+ * @type {number}
+ * @default
+ */
+SFHL.Arc.prototype.endAngle = 2 * Math.PI;
+
+
+/**
+ * Render arc to context.
+ * 
+ * @override
  * @param {HTMLContext} context
  */
-SFHL.Drawable.prototype.render = function (context) {
-	throw new Error("Missing draw implementation of Drawable object.");
+SFHL.Arc.prototype.render = function (context) {
+	context.beginPath();
+	context.arc(this.position.x, this.position.y, this.radius, this.startAngle, this.endAngle, false);
+	context.lineWidth = this.lineWidth;
+	
+	context.strokeStyle = this.color.toString();
+	context.stroke();
+};
+/**
+ * @class
+ * @classdesc Time lord.
+ */
+SFHL.Clock = function () {
+	this.reset();
 };
 
 /**
- * Render object to scene.
+ * Return elapsed time (in miliseconds) from last reset.
+ * 
+ * @return {number} Elapsed time since last reset.
  */
-SFHL.Drawable.prototype.draw = function () {
-	this.render(SFHL.Application.instance.context);
+SFHL.Clock.prototype.getElapsedTime = function () {
+	return (new Date().getTime() - this.lastTime);
+};
+
+/**
+ * Reset clock counter.
+ * Called on creation.
+ * 
+ * @return {number} Elapsed time since last reset.
+ */
+SFHL.Clock.prototype.reset = function () {
+	var newTime = new Date().getTime();
+	var elapsedTime = newTime - this.lastTime;
+	
+	this.lastTime = newTime;
+	
+	return (elapsedTime);
 };
 /**
  * Inherit from this class allow to listen input events.
@@ -622,6 +688,121 @@ SFHL.EventsManager.prototype.callKeyListeners = function () {
 };
 
 /**
+ * @class
+ * @classdesc Pixel frame. Must be updated after each modification.
+ * @implements SFHL.Drawable
+ */
+SFHL.Frame = function () {
+	this.start = new SFHL.Vector();
+	this.end = new SFHL.Vector();
+	this.color = SFHL.Color.black.clone();
+	
+	this.borders = [new SFHL.Line(), new SFHL.Line(), new SFHL.Line(), new SFHL.Line()];
+
+	this.angles = [new SFHL.Arc(), new SFHL.Arc(), new SFHL.Arc(), new SFHL.Arc()];
+	this.angles[0].startAngle = Math.PI;
+	this.angles[0].endAngle = 3 * Math.PI / 2;
+	this.angles[1].startAngle = 3 * Math.PI / 2;
+	this.angles[1].endAngle = Math.PI * 2;
+	this.angles[2].startAngle = 0;
+	this.angles[2].endAngle = Math.PI / 2;
+	this.angles[3].startAngle = Math.PI / 2;
+	this.angles[3].endAngle = Math.PI;
+	
+	this.update();
+};
+
+SFHL.Frame.prototype = Object.create(SFHL.Drawable.prototype);
+
+/**
+ * @type {SFHL.Vector}
+ */
+SFHL.Frame.prototype.start = null;
+
+/**
+ * @type {SFHL.Vector}
+ */
+SFHL.Frame.prototype.end = null;
+
+/**
+ * @type {SFHL.Color}
+ * @default
+ */
+SFHL.Frame.prototype.color = SFHL.Color.black;
+
+/**
+ * @type {number}
+ * @default
+ */
+SFHL.Frame.prototype.lineWidth = 1;
+
+/**
+ * @type {number}
+ * @default
+ */
+SFHL.Frame.prototype.anglesRadius = 1;
+
+/**
+ * Update frame internal data from public members.
+ */
+SFHL.Frame.prototype.update = function () {
+	for (var i in this.borders) {
+		var border = this.borders[i];
+		border.color = this.color;
+		border.width = this.lineWidth;
+	}
+	
+	this.borders[0].start.x = this.start.x + this.anglesRadius - 1;
+	this.borders[0].start.y = this.start.y;
+	this.borders[0].end.x = this.end.x - this.anglesRadius + 1;
+	this.borders[0].end.y = this.start.y;
+	this.borders[1].start.x = this.end.x;
+	this.borders[1].start.y = this.start.y + this.anglesRadius - 1;
+	this.borders[1].end.x = this.end.x;
+	this.borders[1].end.y = this.end.y - this.anglesRadius + 1;
+	this.borders[2].start.x = this.end.x - this.anglesRadius + 1;
+	this.borders[2].start.y = this.end.y;
+	this.borders[2].end.x = this.start.x + this.anglesRadius - 1;
+	this.borders[2].end.y = this.end.y;
+	this.borders[3].start.x = this.start.x;
+	this.borders[3].start.y = this.end.y - this.anglesRadius + 1;
+	this.borders[3].end.x = this.start.x;
+	this.borders[3].end.y = this.start.y + this.anglesRadius - 1;
+
+	for (var i in this.angles) {
+		var angle = this.angles[i];
+		angle.radius = this.anglesRadius;
+		angle.color = this.color;
+		angle.lineWidth = this.lineWidth;
+	}
+	
+	this.angles[0].position.x = this.start.x + this.anglesRadius;
+	this.angles[0].position.y = this.start.y + this.anglesRadius;
+	this.angles[1].position.x = this.end.x - this.anglesRadius;
+	this.angles[1].position.y = this.start.y + this.anglesRadius;
+	this.angles[2].position.x = this.end.x - this.anglesRadius;
+	this.angles[2].position.y = this.end.y - this.anglesRadius;
+	this.angles[3].position.x = this.start.x + this.anglesRadius;
+	this.angles[3].position.y = this.end.y - this.anglesRadius;
+};
+
+/**
+ * Render intern data to 2D context.
+ * 
+ * @override
+ * @param {HTMLContext} context
+ */
+SFHL.Frame.prototype.render = function (context) {
+	this.borders[0].render(context);
+	this.borders[1].render(context);
+	this.borders[2].render(context);
+	this.borders[3].render(context);
+	this.angles[0].render(context);
+	this.angles[1].render(context);
+	this.angles[2].render(context);
+	this.angles[3].render(context);
+};
+/**
  * Static object regrouping keyboard functions.
  * 
  * @class
@@ -682,20 +863,9 @@ SFHL.KeyEventListener.prototype.onEvent = function (data) {
 	throw new SFHL.ImplementationException(this, "onEvent", "KeyEventListener");
 };
 /**
- * Enum for line drawing style.
- * 
- * @readonly
- * @enum {string}
- */
-SFHL.LineCap = {
-	BUTT: "butt",
-	ROUND: "round",
-	SQUARE: "square"
-};
-/**
  * @class
  * @classdesc Pixel line.
- * @extends SFHL.Drawable
+ * @implements SFHL.Drawable
  */
 SFHL.Line = function () {
 	this.start = new SFHL.Vector();
@@ -731,11 +901,12 @@ SFHL.Line.prototype.color = SFHL.Color.black;
  * @type {SFHL.LineCap}
  * @default
  */
-SFHL.Line.prototype.lineCap = SFHL.LineCap.butt;
+SFHL.Line.prototype.lineCap = SFHL.LineCap.BUTT;
 
 /**
  * Render line to 2D context.
  * 
+ * @override
  * @param {HTMLContext} context
  */
 SFHL.Line.prototype.render = function (context) {
@@ -819,7 +990,7 @@ SFHL.KeyEventListener.prototype.onEvent = function (data, movement) {
 /**
  * @class
  * @classdesc Colored rectangle.
- * @extends SFHL.Drawable
+ * @implements SFHL.Drawable
  */
 SFHL.Rectangle = function () {
 	this.position = new SFHL.Vector();
@@ -871,6 +1042,12 @@ SFHL.Rectangle.prototype.border = false;
 SFHL.Rectangle.prototype.borderWidth = 1;
 
 /**
+ * @type {SFHL.LineCap}
+ * @default
+ */
+SFHL.Rectangle.prototype.borderCap = SFHL.LineCap.BUTT;
+
+/**
  * @type {SFHL.Color}
  * @default
  */
@@ -890,18 +1067,19 @@ SFHL.Rectangle.prototype.render = function (context) {
 	}
 	if (this.border) {
 		context.lineWidth = this.borderWidth;
+		context.lineCap = this.borderCap; // useless...
 		context.strokeStyle = this.borderColor.toString();
-		context.stroke();	
+		context.stroke();
 	}
 };
 /**
- * Create node from a parent.
+ * Create node for a renderable data.
  * 
- * @param {Object} parent
+ * @param {SFHL.Renderable} data
  */
-SFHL.SceneNode = function (data, parent) {
+SFHL.SceneNode = function (data) {
 	this.data = data;
-	this.parent = parent;
+	this.parent = null;
 	this.children = [];
 	
 	this.position = new SFHL.Vector();
@@ -959,7 +1137,6 @@ SFHL.SceneNode.prototype.draw = function (context) {
 		context.scale(this.scale.x, this.scale.y);
 		context.rotate(this.rotation);
 		
-		
 		if (this.data) {
 			this.data.render(context);
 		}
@@ -972,11 +1149,10 @@ SFHL.SceneNode.prototype.draw = function (context) {
 /**
  * @class
  * @classdesc Sprite linked to texture.
- * @extends SFHL.Drawable
+ * @implements SFHL.Drawable
  * @todo add texture rect
  */
 SFHL.Sprite = function () {
-	SFHL.Drawable.call(this);
 	this.position = new SFHL.Vector();
 };
 
@@ -1030,10 +1206,10 @@ SFHL.Sprite.fromFile = function (file) {
 /**
  * @class
  * @classdesc Renderable text.
+ * @implements VVGL.Drawable
  * @param {string} string
  */
 SFHL.Text = function (string) {
-	SFHL.Drawable.call(this);
 	this.string = string;
 	this.position = new SFHL.Vector();
 	this.color = SFHL.Color.black.clone();
@@ -1150,6 +1326,7 @@ SFHL.Application = function (canvas) {
 	
 	this.width = this.canvas.width;
 	this.height = this.canvas.height;
+	this.clearColor = SFHL.Color.white.clone();
 	
 	this.clock = new SFHL.Clock();
 	SFHL.EventsHandler.call(this, this.eventsManager);
@@ -1158,9 +1335,35 @@ SFHL.Application = function (canvas) {
 SFHL.Application.prototype = Object.create(SFHL.EventsHandler.prototype);
 
 /**
+ * Resize canvas resolution to specific width and height.
+ * 
+ * @param {number} width
+ * @param {number} height
+ */
+SFHL.Application.prototype.resize = function (width, height) {
+	this.width = width;
+	this.height = height;
+	this.canvas.width = width;
+	this.canvas.height = height;
+};
+
+/**
+ * Resize canvas resolution to navigator's window resolution.
+ */
+SFHL.Application.prototype.resizeToWindow = function () {
+	this.resize(window.innerWidth, window.innerHeight);
+};
+
+/**
  * @type {SFHL.SceneNode}
  */
-SFHL.Application.prototype.root = new SFHL.SceneNode(null, null);
+SFHL.Application.prototype.root = new SFHL.SceneNode(null);
+
+/**
+ * @type {SFHL.Color}
+ * @default
+ */
+SFHL.Application.prototype.clearColor = SFHL.Color.white;
 
 
 /**
@@ -1172,9 +1375,16 @@ SFHL.Application.prototype.start = function () {
 	try {
 		SFHL.Application.loop();
 	} catch (exception) {
-		this.running = false;
+		this.stop();
 		throw (exception);
 	}
+};
+
+/**
+ * Stop or pause the application.
+ */
+SFHL.Application.prototype.stop = function () {
+	this.running = false;	
 };
 
 
@@ -1193,7 +1403,9 @@ SFHL.Application.prototype.manageData = function () {
  * @private
  */
 SFHL.Application.prototype.clear = function () {
-    this.context.clearRect(0, 0, this.width, this.height);
+	this.context.rect(0, 0, this.width, this.height);
+	this.context.fillStyle = this.clearColor.toString();
+	this.context.fill();
 };
 
 /**

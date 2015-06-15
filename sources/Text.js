@@ -1,10 +1,10 @@
 /**
  * @class
  * @classdesc Renderable text.
+ * @implements VVGL.Drawable
  * @param {string} string
  */
 SFHL.Text = function (string) {
-	SFHL.Drawable.call(this);
 	this.string = string;
 	this.position = new SFHL.Vector();
 	this.color = SFHL.Color.black.clone();

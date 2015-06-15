@@ -1,7 +1,7 @@
 /**
  * @class
  * @classdesc Pixel line.
- * @extends SFHL.Drawable
+ * @implements SFHL.Drawable
  */
 SFHL.Line = function () {
 	this.start = new SFHL.Vector();
@@ -37,11 +37,12 @@ SFHL.Line.prototype.color = SFHL.Color.black;
  * @type {SFHL.LineCap}
  * @default
  */
-SFHL.Line.prototype.lineCap = SFHL.LineCap.butt;
+SFHL.Line.prototype.lineCap = SFHL.LineCap.BUTT;
 
 /**
  * Render line to 2D context.
  * 
+ * @override
  * @param {HTMLContext} context
  */
 SFHL.Line.prototype.render = function (context) {

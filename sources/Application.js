@@ -14,6 +14,7 @@ SFHL.Application = function (canvas) {
 	
 	this.width = this.canvas.width;
 	this.height = this.canvas.height;
+	this.clearColor = SFHL.Color.white.clone();
 	
 	this.clock = new SFHL.Clock();
 	SFHL.EventsHandler.call(this, this.eventsManager);
@@ -22,9 +23,35 @@ SFHL.Application = function (canvas) {
 SFHL.Application.prototype = Object.create(SFHL.EventsHandler.prototype);
 
 /**
+ * Resize canvas resolution to specific width and height.
+ * 
+ * @param {number} width
+ * @param {number} height
+ */
+SFHL.Application.prototype.resize = function (width, height) {
+	this.width = width;
+	this.height = height;
+	this.canvas.width = width;
+	this.canvas.height = height;
+};
+
+/**
+ * Resize canvas resolution to navigator's window resolution.
+ */
+SFHL.Application.prototype.resizeToWindow = function () {
+	this.resize(window.innerWidth, window.innerHeight);
+};
+
+/**
  * @type {SFHL.SceneNode}
  */
-SFHL.Application.prototype.root = new SFHL.SceneNode(null, null);
+SFHL.Application.prototype.root = new SFHL.SceneNode(null);
+
+/**
+ * @type {SFHL.Color}
+ * @default
+ */
+SFHL.Application.prototype.clearColor = SFHL.Color.white;
 
 
 /**
@@ -36,9 +63,16 @@ SFHL.Application.prototype.start = function () {
 	try {
 		SFHL.Application.loop();
 	} catch (exception) {
-		this.running = false;
+		this.stop();
 		throw (exception);
 	}
+};
+
+/**
+ * Stop or pause the application.
+ */
+SFHL.Application.prototype.stop = function () {
+	this.running = false;	
 };
 
 
@@ -57,7 +91,9 @@ SFHL.Application.prototype.manageData = function () {
  * @private
  */
 SFHL.Application.prototype.clear = function () {
-    this.context.clearRect(0, 0, this.width, this.height);
+	this.context.rect(0, 0, this.width, this.height);
+	this.context.fillStyle = this.clearColor.toString();
+	this.context.fill();
 };
 
 /**

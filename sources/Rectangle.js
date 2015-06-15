@@ -1,7 +1,7 @@
 /**
  * @class
  * @classdesc Colored rectangle.
- * @extends SFHL.Drawable
+ * @implements SFHL.Drawable
  */
 SFHL.Rectangle = function () {
 	this.position = new SFHL.Vector();
@@ -53,6 +53,12 @@ SFHL.Rectangle.prototype.border = false;
 SFHL.Rectangle.prototype.borderWidth = 1;
 
 /**
+ * @type {SFHL.LineCap}
+ * @default
+ */
+SFHL.Rectangle.prototype.borderCap = SFHL.LineCap.BUTT;
+
+/**
  * @type {SFHL.Color}
  * @default
  */
@@ -72,7 +78,8 @@ SFHL.Rectangle.prototype.render = function (context) {
 	}
 	if (this.border) {
 		context.lineWidth = this.borderWidth;
+		context.lineCap = this.borderCap; // useless...
 		context.strokeStyle = this.borderColor.toString();
-		context.stroke();	
+		context.stroke();
 	}
 };
